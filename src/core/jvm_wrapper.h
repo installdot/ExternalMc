@@ -40,8 +40,8 @@ public:
 
 private:
     static bool bootstrapClassLoader(JNIEnv* env);
-    static jmethodID findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* name, bool isStatic);
-    static jfieldID  findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name, bool isStatic);
+    static jmethodID findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* name, const char* sig, bool isStatic);
+    static jfieldID  findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name, const char* sig, bool isStatic);
 
     static inline JavaVM*     s_vm          = nullptr;
     static inline jvmtiEnv*   s_jvmti       = nullptr;

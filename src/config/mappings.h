@@ -31,6 +31,8 @@ namespace Mappings {
     inline constexpr const char* MinecartChest_Class= "net/minecraft/class_1694";
     inline constexpr const char* Camera_Class       = "net/minecraft/class_4184";
     inline constexpr const char* Options_Class      = "net/minecraft/class_315";
+    inline constexpr const char* SimpleOption_Class = "net/minecraft/class_7172";
+    inline constexpr const char* Window_Class       = "net/minecraft/class_1041";
     inline constexpr const char* Level_Class        = "net/minecraft/class_1937";
     inline constexpr const char* Mouse_Class        = "net/minecraft/class_312";
 
@@ -47,8 +49,10 @@ namespace Mappings {
     inline constexpr const char* MC_gameRenderer_Sig = "Lnet/minecraft/class_757;";
     inline constexpr const char* MC_options          = "field_1690";
     inline constexpr const char* MC_options_Sig      = "Lnet/minecraft/class_315;";
-    inline constexpr const char* MC_mouse           = "field_1704";
+    inline constexpr const char* MC_mouse           = "field_1729";
     inline constexpr const char* MC_mouse_Sig       = "Lnet/minecraft/class_312;";
+    inline constexpr const char* MC_window          = "field_1704";
+    inline constexpr const char* MC_window_Sig      = "Lnet/minecraft/class_1041;";
 
     // ─── Mouse Methods ─────────────────────────────────────────────────
     inline constexpr const char* Mouse_lockCursor   = "method_1612";
@@ -57,22 +61,26 @@ namespace Mappings {
     inline constexpr const char* Mouse_unlockCursor_Sig = "()V";
 
     // ─── GameRenderer Methods ────────────────────────────────────────
-    inline constexpr const char* GR_getMainCamera     = "method_3196";
+    inline constexpr const char* GR_getMainCamera     = "method_19418";
     inline constexpr const char* GR_getMainCamera_Sig = "()Lnet/minecraft/class_4184;";
-    inline constexpr const char* GR_getFov            = "method_3199";
-    inline constexpr const char* GR_getFov_Sig        = "(Lnet/minecraft/class_4184;FZ)F";
+    inline constexpr const char* GR_getFov            = "method_3196";
+    inline constexpr const char* GR_getFov_Sig        = "(Lnet/minecraft/class_4184;FZ)D";
+    inline constexpr const char* GR_getProjectionMatrix = "method_22973";
+    inline constexpr const char* GR_getProjectionMatrix_Sig = "(D)Lorg/joml/Matrix4f;";
 
     // ─── Camera Methods ──────────────────────────────────────────────
     inline constexpr const char* Camera_getPosition     = "method_19326";
     inline constexpr const char* Camera_getPosition_Sig = "()Lnet/minecraft/class_243;";
-    inline constexpr const char* Camera_getXRot         = "method_19330";
+    inline constexpr const char* Camera_getXRot         = "method_19329";
     inline constexpr const char* Camera_getXRot_Sig     = "()F";
-    inline constexpr const char* Camera_getYRot         = "method_19329";
+    inline constexpr const char* Camera_getYRot         = "method_19330";
     inline constexpr const char* Camera_getYRot_Sig     = "()F";
 
     // ─── Options Fields ──────────────────────────────────────────────
-    inline constexpr const char* Options_fov            = "field_1849"; // In Fabric 1.21, this is field_1849 SimpleOption
-    // SimpleOption is class_7172. get() is method_41753
+    inline constexpr const char* Options_fov            = "field_1826";
+    inline constexpr const char* Options_fov_Sig        = "Lnet/minecraft/class_7172;";
+    inline constexpr const char* SimpleOption_getValue  = "method_41753";
+    inline constexpr const char* SimpleOption_getValue_Sig = "()Ljava/lang/Object;";
 
     // ─── Entity Methods ────────────────────────────────────────────────
     inline constexpr const char* Entity_getX        = "method_23317";
@@ -110,9 +118,9 @@ namespace Mappings {
     inline constexpr const char* Entity_getName_Sig = "()Lnet/minecraft/class_2561;";
     inline constexpr const char* Entity_getScoreboardName     = "method_5820";
     inline constexpr const char* Entity_getScoreboardName_Sig = "()Ljava/lang/String;";
-    inline constexpr const char* Entity_setSharedFlag     = "method_5728";
+    inline constexpr const char* Entity_setSharedFlag     = "method_5729";
     inline constexpr const char* Entity_setSharedFlag_Sig = "(IZ)V";
-    inline constexpr const char* Entity_getSharedFlag     = "method_5666";
+    inline constexpr const char* Entity_getSharedFlag     = "method_5795";
     inline constexpr const char* Entity_getSharedFlag_Sig = "(I)Z";
 
     // ─── LivingEntity Methods ──────────────────────────────────────────
@@ -136,8 +144,10 @@ namespace Mappings {
     inline constexpr const char* GameProfile_getName_Sig   = "()Ljava/lang/String;";
 
     // ─── ClientLevel / Level ──────────────────────────────────────────
-    inline constexpr const char* Level_players      = "method_18456";
-    inline constexpr const char* Level_players_Sig  = "()Ljava/util/List;";
+    inline constexpr const char* Level_players      = "field_18226";
+    inline constexpr const char* Level_players_Sig  = "Ljava/util/List;";
+    inline constexpr const char* Level_getEntities      = "method_18112";
+    inline constexpr const char* Level_getEntities_Sig  = "()Ljava/lang/Iterable;";
     
     inline constexpr const char* Level_getBlockState = "method_8320";
     inline constexpr const char* Level_getBlockState_Sig = "(Lnet/minecraft/class_2338;)Lnet/minecraft/class_2680;";
@@ -157,9 +167,9 @@ namespace Mappings {
     inline constexpr const char* Entity_isInWater     = "method_5799";
     inline constexpr const char* Entity_isInWater_Sig = "()Z";
 
-    inline constexpr const char* Entity_onGround     = "method_24828";
-    inline constexpr const char* Entity_onGround_Sig = "()Z";
-    inline constexpr const char* Entity_horizontalCollision = "field_28646"; // Wait, might be field_28646
+    inline constexpr const char* Entity_onGround     = "field_5952";
+    inline constexpr const char* Entity_onGround_Sig = "Z";
+    inline constexpr const char* Entity_horizontalCollision = "field_5976";
     inline constexpr const char* Entity_horizontalCollision_Sig = "Z";
     
     // ─── ClientPacketListener ──────────────────────────────────────────
@@ -230,19 +240,22 @@ namespace Mappings {
     inline constexpr const char* Vec3_D_Sig = "D";
     inline constexpr const char* AABB_D_Sig = "D";
 
-    inline constexpr const char* LivingEntity_jumping = "field_6281";
+    inline constexpr const char* LivingEntity_jumping = "field_6282";
     inline constexpr const char* LivingEntity_jumping_Sig = "Z";
     inline constexpr const char* LivingEntity_discardFriction = "field_6214";
     inline constexpr const char* LivingEntity_discardFriction_Sig = "Z";
     inline constexpr const char* Entity_isShiftKeyDown = "method_5715";
     inline constexpr const char* Entity_isShiftKeyDown_Sig = "()Z";
 
-    inline constexpr const char* GR_getProjectionMatrix = "method_3195";
-    inline constexpr const char* GR_getProjectionMatrix_Sig = "(D)Lorg/joml/Matrix4f;";
     inline constexpr const char* RS_getProjectionMatrix = "getProjectionMatrix";
     inline constexpr const char* RS_getProjectionMatrix_Sig = "()Lorg/joml/Matrix4f;";
     inline constexpr const char* RS_getModelViewMatrix = "getModelViewMatrix";
     inline constexpr const char* RS_getModelViewMatrix_Sig = "()Lorg/joml/Matrix4f;";
+
+    inline constexpr const char* Window_getFramebufferWidth = "method_4489";
+    inline constexpr const char* Window_getFramebufferWidth_Sig = "()I";
+    inline constexpr const char* Window_getFramebufferHeight = "method_4506";
+    inline constexpr const char* Window_getFramebufferHeight_Sig = "()I";
 
     inline constexpr const char* Matrix4f_m00 = "m00";
     inline constexpr const char* Matrix4f_m01 = "m01";

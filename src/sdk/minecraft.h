@@ -49,9 +49,9 @@ private:
 
     // Camera (uses FIELDS, not methods — Camera is not an Entity subclass)
     static inline jclass    s_camClass       = nullptr;
-    static inline jfieldID  s_camPosition    = nullptr;  // Vec3 position
-    static inline jfieldID  s_camYRot        = nullptr;  // float yRot
-    static inline jfieldID  s_camXRot        = nullptr;  // float xRot
+    static inline jmethodID s_camPosition    = nullptr;  // Vec3 position
+    static inline jmethodID s_camYRot        = nullptr;  // float yaw
+    static inline jmethodID s_camXRot        = nullptr;  // float pitch
 
     // Vec3 fields (cached from CEntity — reuse)
     // Options FOV

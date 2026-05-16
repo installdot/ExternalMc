@@ -70,7 +70,7 @@ bool CEntity::initIDs() {
 
     s_componentClass = JvmWrapper::findClass(Mappings::Component_Class);
     if (s_componentClass) {
-        s_componentGetString = JvmWrapper::getMethodID(s_componentClass, "getString", "()Ljava/lang/String;");
+        s_componentGetString = JvmWrapper::getMethodID(s_componentClass, Mappings::Component_getString, Mappings::Component_getString_Sig);
         if (!s_componentGetString) printf("[Ghost] FAILED to resolve Component::getString\n");
     } else {
         printf("[Ghost] FAILED to find Component class\n");
@@ -111,7 +111,7 @@ bool CEntity::initIDs() {
     s_discardFriction = JvmWrapper::getFieldID(s_livingClass, Mappings::LivingEntity_discardFriction, Mappings::LivingEntity_discardFriction_Sig);
     s_isShiftKeyDown = JvmWrapper::getMethodID(s_entityClass, Mappings::Entity_isShiftKeyDown, Mappings::Entity_isShiftKeyDown_Sig);
 
-    bool ok = s_getX && s_getY && s_getZ && s_getYRot && s_getXRot && s_setYRot && s_setXRot && s_isAlive && s_getId && s_getBBox && s_getDeltaMov && s_setDeltaMov && s_setSharedFlag && s_getSharedFlag && s_isInWater && s_onGround && s_horizontalCollision && s_jumping && s_discardFriction && s_isShiftKeyDown;
+    bool ok = s_getX && s_getY && s_getZ && s_getYRot && s_getXRot && s_setYRot && s_setXRot && s_isAlive && s_getId && s_getBBox && s_getDeltaMov && s_setDeltaMov && s_setSharedFlag && s_getSharedFlag && s_isInWater && s_onGround && s_horizontalCollision && s_jumping && s_isShiftKeyDown;
     
     // LivingEntity
     ok = ok && s_getHealth && s_getMaxHealth;

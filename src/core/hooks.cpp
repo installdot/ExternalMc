@@ -5,6 +5,7 @@
 #include "render/esp_renderer.h"
 #include "modules/module_manager.h"
 #include "core/jvm_wrapper.h"
+#include "sdk/minecraft.h"
 
 // Forward declare ImGui Win32 handler
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM, LPARAM);
@@ -112,34 +113,31 @@ LRESULT CALLBACK Hooks::hkWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == WM_KEYDOWN && wp == VK_INSERT) {
         Menu::toggle();
         
-        // Handle Mouse state using JNI (Fabric 1.21 Intermediary)
+        // Handle mouse grab through cached JNI lookups.
         JNIEnv* env = JvmWrapper::getEnv();
         if (env) {
-            jclass mcClass = env->FindClass(Mappings::Minecraft_Class);
-            if (mcClass) {
-                jmethodID getInstance = env->GetStaticMethodID(mcClass, Mappings::MC_getInstance, Mappings::MC_getInstance_Sig);
-                jobject mc = env->CallStaticObjectMethod(mcClass, getInstance);
-                if (mc) {
-                    jfieldID mouseField = env->GetFieldID(mcClass, Mappings::MC_mouse, Mappings::MC_mouse_Sig);
-                    jobject mouse = env->GetObjectField(mc, mouseField);
-                    if (mouse) {
-                        jclass mouseClass = env->FindClass(Mappings::Mouse_Class);
-                        if (mouseClass) {
-                            if (Menu::isVisible()) {
-                                jmethodID unlock = env->GetMethodID(mouseClass, Mappings::Mouse_unlockCursor, Mappings::Mouse_unlockCursor_Sig);
-                                if (unlock) env->CallVoidMethod(mouse, unlock);
-                            } else {
-                                jmethodID lock = env->GetMethodID(mouseClass, Mappings::Mouse_lockCursor, Mappings::Mouse_lockCursor_Sig);
-                                if (lock) env->CallVoidMethod(mouse, lock);
-                            }
-                            env->DeleteLocalRef(mouseClass);
-                        }
-                        env->DeleteLocalRef(mouse);
-                    }
-                    env->DeleteLocalRef(mc);
+            env->PushLocalFrame(16);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+
+            jclass mcClass = JvmWrapper::findClass(Mappings::Minecraft_Class);
+            jclass mouseClass = JvmWrapper::findClass(Mappings::Mouse_Class);
+            jobject mc = CMinecraft::getInstance();
+
+            if (mcClass && mouseClass && mc) {
+                jfieldID mouseField = JvmWrapper::getFieldID(mcClass, Mappings::MC_mouse, Mappings::MC_mouse_Sig);
+                jobject mouse = mouseField ? env->GetObjectField(mc, mouseField) : nullptr;
+
+                if (mouse && !env->ExceptionCheck()) {
+                    const char* methodName = Menu::isVisible() ? Mappings::Mouse_unlockCursor : Mappings::Mouse_lockCursor;
+                    const char* methodSig = Menu::isVisible() ? Mappings::Mouse_unlockCursor_Sig : Mappings::Mouse_lockCursor_Sig;
+                    jmethodID method = JvmWrapper::getMethodID(mouseClass, methodName, methodSig);
+                    if (method) env->CallVoidMethod(mouse, method);
                 }
-                env->DeleteLocalRef(mcClass);
+
+                if (env->ExceptionCheck()) env->ExceptionClear();
             }
+
+            env->PopLocalFrame(nullptr);
         }
         return TRUE;
     }

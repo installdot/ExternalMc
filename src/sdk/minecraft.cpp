@@ -46,8 +46,8 @@ bool CMinecraft::initIDs() {
         JvmWrapper::dumpClassInfo(s_grClass, "GameRenderer", 200, 50);
         
         s_getMainCamera = JvmWrapper::getMethodID(s_grClass, Mappings::GR_getMainCamera, Mappings::GR_getMainCamera_Sig);
-        s_getGRProjMatrix = env->GetMethodID(s_grClass, Mappings::GR_getProjectionMatrix, Mappings::GR_getProjectionMatrix_Sig);
-        s_getFov = env->GetMethodID(s_grClass, Mappings::GR_getFov, Mappings::GR_getFov_Sig);
+        s_getGRProjMatrix = JvmWrapper::getMethodID(s_grClass, Mappings::GR_getProjectionMatrix, Mappings::GR_getProjectionMatrix_Sig);
+        s_getFov = JvmWrapper::getMethodID(s_grClass, Mappings::GR_getFov, Mappings::GR_getFov_Sig);
         
         if (s_getMainCamera) printf("[Ghost] GameRenderer::getMainCamera resolved OK\n");
         if (s_getGRProjMatrix) printf("[Ghost] GameRenderer::getProjectionMatrix resolved OK\n");
@@ -61,18 +61,12 @@ bool CMinecraft::initIDs() {
     if (s_camClass) {
         JvmWrapper::dumpClassInfo(s_camClass, "Camera", 30, 20);
         
-        // Camera stores position/rotation as FIELDS
-        s_camPosition = env->GetFieldID(s_camClass, "position", "Lnet/minecraft/world/phys/Vec3;");
-        if (env->ExceptionCheck()) { env->ExceptionClear(); s_camPosition = nullptr; }
-        
-        s_camYRot = env->GetFieldID(s_camClass, "yRot", "F");
-        if (env->ExceptionCheck()) { env->ExceptionClear(); s_camYRot = nullptr; }
-        
-        s_camXRot = env->GetFieldID(s_camClass, "xRot", "F");
-        if (env->ExceptionCheck()) { env->ExceptionClear(); s_camXRot = nullptr; }
+        s_camPosition = JvmWrapper::getMethodID(s_camClass, Mappings::Camera_getPosition, Mappings::Camera_getPosition_Sig);
+        s_camYRot = JvmWrapper::getMethodID(s_camClass, Mappings::Camera_getYRot, Mappings::Camera_getYRot_Sig);
+        s_camXRot = JvmWrapper::getMethodID(s_camClass, Mappings::Camera_getXRot, Mappings::Camera_getXRot_Sig);
         
         bool camOK = s_camPosition && s_camYRot && s_camXRot;
-        printf("[Ghost] Camera fields resolved: %s (pos=%p yRot=%p xRot=%p)\n",
+        printf("[Ghost] Camera accessors resolved: %s (pos=%p yRot=%p xRot=%p)\n",
                camOK ? "OK" : "PARTIAL", s_camPosition, s_camYRot, s_camXRot);
     } else {
         printf("[Ghost] WARN: Camera class not found\n");
@@ -81,17 +75,13 @@ bool CMinecraft::initIDs() {
     // ── Options FOV ────────────────────────────────────────────────────
     s_optionsClass = JvmWrapper::findClass(Mappings::Options_Class);
     if (s_optionsClass && s_options) {
-        // fov is an OptionInstance<Integer>
-        s_optFov = env->GetFieldID(s_optionsClass, "fov",
-            "Lnet/minecraft/client/OptionInstance;");
-        if (env->ExceptionCheck()) { env->ExceptionClear(); s_optFov = nullptr; }
+        s_optFov = JvmWrapper::getFieldID(s_optionsClass, Mappings::Options_fov, Mappings::Options_fov_Sig);
         
         if (s_optFov) {
-            // OptionInstance.get() returns Object
-            jclass optInstClass = JvmWrapper::findClass("net/minecraft/client/OptionInstance");
+            // SimpleOption.getValue() returns Object
+            jclass optInstClass = JvmWrapper::findClass(Mappings::SimpleOption_Class);
             if (optInstClass) {
-                s_optInstGet = env->GetMethodID(optInstClass, "get", "()Ljava/lang/Object;");
-                if (env->ExceptionCheck()) { env->ExceptionClear(); s_optInstGet = nullptr; }
+                s_optInstGet = JvmWrapper::getMethodID(optInstClass, Mappings::SimpleOption_getValue, Mappings::SimpleOption_getValue_Sig);
                 printf("[Ghost] Options FOV resolved: %s\n", s_optInstGet ? "OK" : "FAILED");
             }
         } else {
@@ -100,17 +90,13 @@ bool CMinecraft::initIDs() {
     }
 
     // ── Window (framebuffer dimensions for aspect ratio) ─────────────
-    s_window = env->GetFieldID(s_mcClass, "window",
-        "Lcom/mojang/blaze3d/platform/Window;");
-    if (env->ExceptionCheck()) { env->ExceptionClear(); s_window = nullptr; }
+    s_window = JvmWrapper::getFieldID(s_mcClass, Mappings::MC_window, Mappings::MC_window_Sig);
 
     if (s_window) {
-        s_windowClass = JvmWrapper::findClass("com/mojang/blaze3d/platform/Window");
+        s_windowClass = JvmWrapper::findClass(Mappings::Window_Class);
         if (s_windowClass) {
-            s_getWidth  = env->GetMethodID(s_windowClass, "getWidth",  "()I");
-            if (env->ExceptionCheck()) { env->ExceptionClear(); s_getWidth = nullptr; }
-            s_getHeight = env->GetMethodID(s_windowClass, "getHeight", "()I");
-            if (env->ExceptionCheck()) { env->ExceptionClear(); s_getHeight = nullptr; }
+            s_getWidth  = JvmWrapper::getMethodID(s_windowClass, Mappings::Window_getFramebufferWidth, Mappings::Window_getFramebufferWidth_Sig);
+            s_getHeight = JvmWrapper::getMethodID(s_windowClass, Mappings::Window_getFramebufferHeight, Mappings::Window_getFramebufferHeight_Sig);
             printf("[Ghost] Window resolved: %s (w=%p h=%p)\n",
                    (s_getWidth && s_getHeight) ? "OK" : "PARTIAL", s_getWidth, s_getHeight);
         } else {
@@ -242,7 +228,7 @@ jobject CMinecraft::getInstance() {
                         if (isStatic) {
                             // Try to read it as a Minecraft-typed field
                             jfieldID fid = env->GetStaticFieldID(s_mcClass, name.c_str(), 
-                                "Lnet/minecraft/client/Minecraft;");
+                                Mappings::MC_getInstance_Sig);
                             if (env->ExceptionCheck()) { env->ExceptionClear(); fid = nullptr; }
                             
                             if (fid) {
@@ -375,28 +361,25 @@ CMinecraft::CameraData CMinecraft::getCameraData() {
     if (gr && s_getMainCamera && s_camPosition && s_camYRot && s_camXRot) {
         jobject camera = env->CallObjectMethod(gr, s_getMainCamera);
         if (camera && !env->ExceptionCheck()) {
-            // Read Camera.position (Vec3 field)
-            jobject pos = env->GetObjectField(camera, s_camPosition);
+            jobject pos = env->CallObjectMethod(camera, s_camPosition);
             if (pos && !env->ExceptionCheck()) {
-                jclass v3c = env->GetObjectClass(pos);
-                jfieldID fx = env->GetFieldID(v3c, "x", "D");
-                jfieldID fy = env->GetFieldID(v3c, "y", "D");
-                jfieldID fz = env->GetFieldID(v3c, "z", "D");
+                jclass v3c = JvmWrapper::findClass(Mappings::Vec3_Class);
+                jfieldID fx = JvmWrapper::getFieldID(v3c, Mappings::Vec3_x, Mappings::Vec3_D_Sig);
+                jfieldID fy = JvmWrapper::getFieldID(v3c, Mappings::Vec3_y, Mappings::Vec3_D_Sig);
+                jfieldID fz = JvmWrapper::getFieldID(v3c, Mappings::Vec3_z, Mappings::Vec3_D_Sig);
                 if (fx && fy && fz) {
                     data.x = env->GetDoubleField(pos, fx);
                     data.y = env->GetDoubleField(pos, fy);
                     data.z = env->GetDoubleField(pos, fz);
                 }
                 if (env->ExceptionCheck()) env->ExceptionClear();
-                env->DeleteLocalRef(v3c);
                 env->DeleteLocalRef(pos);
             }
             if (env->ExceptionCheck()) env->ExceptionClear();
 
-            // Read Camera.yRot, Camera.xRot (float fields)
-            data.yaw   = env->GetFloatField(camera, s_camYRot);
+            data.yaw   = env->CallFloatMethod(camera, s_camYRot);
             if (env->ExceptionCheck()) env->ExceptionClear();
-            data.pitch = env->GetFloatField(camera, s_camXRot);
+            data.pitch = env->CallFloatMethod(camera, s_camXRot);
             if (env->ExceptionCheck()) env->ExceptionClear();
 
             data.valid = true;
@@ -404,9 +387,9 @@ CMinecraft::CameraData CMinecraft::getCameraData() {
             // ── Read exact dynamic FOV ────────────────────────────────────────
             if (s_getFov) {
                 // getFov(Camera camera, float partialTicks, boolean useFovSetting)
-                float fov = env->CallFloatMethod(gr, s_getFov, camera, 1.0f, JNI_TRUE);
+                double fov = env->CallDoubleMethod(gr, s_getFov, camera, 1.0f, JNI_TRUE);
                 if (!env->ExceptionCheck()) {
-                    data.fov = fov;
+                    data.fov = static_cast<float>(fov);
                 } else {
                     env->ExceptionClear();
                 }

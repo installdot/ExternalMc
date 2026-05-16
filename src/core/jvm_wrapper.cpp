@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "core/jvm_wrapper.h"
 #include "jni_headers/jvmti_min.h"
+#include "config/mappings.h"
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -51,11 +52,14 @@ bool JvmWrapper::bootstrapClassLoader(JNIEnv* env) {
         jint count = 0;
         jclass* classes = nullptr;
         if (s_jvmti->GetLoadedClasses(&count, &classes) == JVMTI_ERROR_NONE && classes) {
-            const char* targetSig = "Lnet/minecraft/client/Minecraft;";
+            std::string mappedSig = "L";
+            mappedSig += Mappings::Minecraft_Class;
+            mappedSig += ";";
+            const char* fallbackSig = "Lnet/minecraft/client/Minecraft;";
             for (jint i = 0; i < count; i++) {
                 char* sig = nullptr;
                 if (!mcClass && s_jvmti->GetClassSignature(classes[i], &sig, nullptr) == JVMTI_ERROR_NONE && sig) {
-                    if (strcmp(sig, targetSig) == 0) {
+                    if (mappedSig == sig || strcmp(sig, fallbackSig) == 0) {
                         mcClass = (jclass)env->NewLocalRef(classes[i]);
                     }
                     s_jvmti->Deallocate((unsigned char*)sig);
@@ -69,6 +73,11 @@ bool JvmWrapper::bootstrapClassLoader(JNIEnv* env) {
     }
 
     // ── Strategy B: Direct FindClass (fallback, may use wrong classloader) ──
+    if (!mcClass) {
+        mcClass = env->FindClass(Mappings::Minecraft_Class);
+        if (env->ExceptionCheck()) { env->ExceptionClear(); mcClass = nullptr; }
+    }
+
     if (!mcClass) {
         mcClass = env->FindClass("net/minecraft/client/Minecraft");
         if (env->ExceptionCheck()) { env->ExceptionClear(); mcClass = nullptr; }
@@ -218,7 +227,7 @@ jmethodID JvmWrapper::getMethodID(jclass cls, const char* name, const char* sig)
     if (!env->ExceptionCheck() && id) return id;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    return findMethodViaJVMTI(env, cls, name, false);
+    return findMethodViaJVMTI(env, cls, name, sig, false);
 }
 
 jmethodID JvmWrapper::getStaticMethodID(jclass cls, const char* name, const char* sig) {
@@ -228,7 +237,7 @@ jmethodID JvmWrapper::getStaticMethodID(jclass cls, const char* name, const char
     if (!env->ExceptionCheck() && id) return id;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    return findMethodViaJVMTI(env, cls, name, true);
+    return findMethodViaJVMTI(env, cls, name, sig, true);
 }
 
 jfieldID JvmWrapper::getFieldID(jclass cls, const char* name, const char* sig) {
@@ -238,7 +247,7 @@ jfieldID JvmWrapper::getFieldID(jclass cls, const char* name, const char* sig) {
     if (!env->ExceptionCheck() && id) return id;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    return findFieldViaJVMTI(env, cls, name, false);
+    return findFieldViaJVMTI(env, cls, name, sig, false);
 }
 
 jfieldID JvmWrapper::getStaticFieldID(jclass cls, const char* name, const char* sig) {
@@ -248,16 +257,16 @@ jfieldID JvmWrapper::getStaticFieldID(jclass cls, const char* name, const char* 
     if (!env->ExceptionCheck() && id) return id;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    return findFieldViaJVMTI(env, cls, name, true);
+    return findFieldViaJVMTI(env, cls, name, sig, true);
 }
 
-jmethodID JvmWrapper::findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* name, bool isStatic) {
+jmethodID JvmWrapper::findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* name, const char* sig, bool isStatic) {
     if (!s_jvmti) return nullptr;
 
     jmethodID result = nullptr;
     jclass currentCls = cls; // cls is a global ref from findClass or SDK
 
-    printf("[Ghost] JVMTI Scan: method '%s' (static: %d)\n", name, isStatic);
+    printf("[Ghost] JVMTI Scan: method '%s' '%s' (static: %d)\n", name, sig ? sig : "", isStatic);
 
     while (currentCls && !result) {
         jint methodCount = 0;
@@ -267,7 +276,8 @@ jmethodID JvmWrapper::findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* na
             for (jint i = 0; i < methodCount; i++) {
                 char* mName = nullptr; char* mSig = nullptr;
                 if (s_jvmti->GetMethodName(methods[i], &mName, &mSig, nullptr) == JVMTI_ERROR_NONE) {
-                    if (strcmp(mName, name) == 0) {
+                    bool sigMatches = !sig || (mSig && strcmp(mSig, sig) == 0);
+                    if (strcmp(mName, name) == 0 && sigMatches) {
                         jint mods = 0;
                         s_jvmti->GetMethodModifiers(methods[i], &mods);
                         bool isStat = (mods & 0x0008) != 0;
@@ -297,17 +307,17 @@ jmethodID JvmWrapper::findMethodViaJVMTI(JNIEnv* env, jclass cls, const char* na
     if (currentCls && currentCls != cls) env->DeleteLocalRef(currentCls);
     
     if (result) printf("[Ghost]   JVMTI Found '%s' OK\n", name);
-    else printf("[Ghost]   JVMTI FAILED to find '%s'\n", name);
+    else printf("[Ghost]   JVMTI FAILED to find '%s' '%s'\n", name, sig ? sig : "");
     return result;
 }
 
-jfieldID JvmWrapper::findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name, bool isStatic) {
+jfieldID JvmWrapper::findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name, const char* sig, bool isStatic) {
     if (!s_jvmti) return nullptr;
 
     jfieldID result = nullptr;
     jclass currentCls = cls;
 
-    printf("[Ghost] JVMTI Scan: field '%s' (static: %d)\n", name, isStatic);
+    printf("[Ghost] JVMTI Scan: field '%s' '%s' (static: %d)\n", name, sig ? sig : "", isStatic);
 
     while (currentCls && !result) {
         jint fieldCount = 0;
@@ -316,7 +326,8 @@ jfieldID JvmWrapper::findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name
             for (jint i = 0; i < fieldCount; i++) {
                 char* fName = nullptr; char* fSig = nullptr;
                 if (s_jvmti->GetFieldName(currentCls, fields[i], &fName, &fSig, nullptr) == JVMTI_ERROR_NONE) {
-                    if (strcmp(fName, name) == 0) {
+                    bool sigMatches = !sig || (fSig && strcmp(fSig, sig) == 0);
+                    if (strcmp(fName, name) == 0 && sigMatches) {
                         jint mods = 0;
                         s_jvmti->GetFieldModifiers(currentCls, fields[i], &mods);
                         bool isStat = (mods & 0x0008) != 0;
@@ -343,7 +354,7 @@ jfieldID JvmWrapper::findFieldViaJVMTI(JNIEnv* env, jclass cls, const char* name
     if (currentCls && currentCls != cls) env->DeleteLocalRef(currentCls);
 
     if (result) printf("[Ghost]   JVMTI Found field '%s' OK\n", name);
-    else printf("[Ghost]   JVMTI FAILED to find field '%s'\n", name);
+    else printf("[Ghost]   JVMTI FAILED to find field '%s' '%s'\n", name, sig ? sig : "");
     return result;
 }
 

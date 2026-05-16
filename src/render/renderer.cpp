@@ -30,9 +30,6 @@ void Renderer::shutdown() {
 }
 
 void Renderer::beginFrame() {
-    // Save OpenGL state before ImGui messes with it
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -42,9 +39,6 @@ void Renderer::endFrame() {
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
-    // Restore OpenGL state
-    glPopAttrib();
 }
 
 void Renderer::setupStyle() {

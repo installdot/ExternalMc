@@ -17,7 +17,7 @@ bool CWorld::initIDs() {
     s_listSize = JvmWrapper::getMethodID(s_listClass, Mappings::List_size, Mappings::List_size_Sig);
     s_listGet  = JvmWrapper::getMethodID(s_listClass, Mappings::List_get, Mappings::List_get_Sig);
 
-    s_entitiesForRendering = JvmWrapper::getMethodID(s_levelClass, "entitiesForRendering", "()Ljava/lang/Iterable;");
+    s_entitiesForRendering = JvmWrapper::getMethodID(s_levelClass, Mappings::Level_getEntities, Mappings::Level_getEntities_Sig);
     s_iterator = JvmWrapper::getMethodID(s_iterableClass, "iterator", "()Ljava/util/Iterator;");
     s_hasNext  = JvmWrapper::getMethodID(s_iteratorClass, "hasNext", "()Z");
     s_next     = JvmWrapper::getMethodID(s_iteratorClass, "next", "()Ljava/lang/Object;");

@@ -5,6 +5,7 @@
 #include "config/mappings.h"
 #include <map>
 #include <cstdlib>
+#include <imgui_internal.h>
 
 // ── Animation Helper ────────────────────────────────────────────────
 float Menu::AnimateFloat(ImGuiID id, float target, float speed) {

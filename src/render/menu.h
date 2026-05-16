@@ -16,7 +16,6 @@ public:
     static void toggle() { s_visible = !s_visible; }
     static bool isVisible() { return s_visible; }
 
-private:
     // ── Phobia-style Custom Widgets ─────────────────────────────────
     static bool PhobiaTab(const char* icon, const char* label, bool selected, ImVec2 pos);
     static bool PhobiaCheckbox(const char* label, bool* v);
@@ -24,6 +23,7 @@ private:
     static void PhobiaChildBegin(const char* title, ImVec2 pos, ImVec2 size);
     static void PhobiaChildEnd();
 
+private:
     // ── Layout Sections ─────────────────────────────────────────────
     static void DrawDecoration();
     static void DrawSidebarTabs();

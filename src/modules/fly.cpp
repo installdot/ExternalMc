@@ -4,7 +4,7 @@
 #include "config/mappings.h"
 #include "render/menu.h"
 
-FlyModule::FlyModule() : Module("Fly", "Allows you to fly", 0x46) { // 'F' key
+FlyModule::FlyModule() : Module("Fly", 0x46) { // 'F' key
 }
 
 void FlyModule::onEnable() {
@@ -47,8 +47,7 @@ void FlyModule::onDisable() {
     env->DeleteLocalRef(mcClass);
 }
 
-void FlyModule::onUpdate() {
-    JNIEnv* env = JvmWrapper::getEnv();
+void FlyModule::onUpdate(JNIEnv* env) {
     if (!env) return;
 
     jclass mcClass = env->FindClass(Mappings::Minecraft_Class);
@@ -115,7 +114,7 @@ void FlyModule::onUpdate() {
     env->DeleteLocalRef(mcClass);
 }
 
-void FlyModule::renderMenu() {
+void FlyModule::onRender() {
     ImGui::Text("Mode");
     const char* modes[] = { "Vanilla", "Velocity" };
     if (ImGui::BeginCombo("##FlyMode", modes[m_mode])) {

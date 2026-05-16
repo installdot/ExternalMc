@@ -4,7 +4,7 @@
 #include "config/mappings.h"
 #include "render/menu.h"
 
-NoFallModule::NoFallModule() : Module("NoFall", "Prevents fall damage", 0x4E) { // 'N' key
+NoFallModule::NoFallModule() : Module("NoFall", 0x4E) { // 'N' key
 }
 
 void NoFallModule::onEnable() {
@@ -13,8 +13,7 @@ void NoFallModule::onEnable() {
 void NoFallModule::onDisable() {
 }
 
-void NoFallModule::onUpdate() {
-    JNIEnv* env = JvmWrapper::getEnv();
+void NoFallModule::onUpdate(JNIEnv* env) {
     if (!env) return;
 
     jclass mcClass = env->FindClass(Mappings::Minecraft_Class);
@@ -74,7 +73,7 @@ void NoFallModule::onUpdate() {
     env->DeleteLocalRef(mcClass);
 }
 
-void NoFallModule::renderMenu() {
+void NoFallModule::onRender() {
     ImGui::Text("Mode");
     const char* modes[] = { "Vanilla", "Catch" };
     if (ImGui::BeginCombo("##NoFallMode", modes[m_mode])) {

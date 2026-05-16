@@ -201,4 +201,69 @@ namespace Mappings {
     inline constexpr const char* Component_getString    = "method_10851";
     inline constexpr const char* Component_getString_Sig = "()Ljava/lang/String;";
 
+    // ─── Extras / Legacy (Added to fix build) ──────────────────────────
+    inline constexpr const char* MC_hitResult = "field_1765";
+    inline constexpr const char* MC_hitResult_Sig = "Lnet/minecraft/class_239;";
+    inline constexpr const char* EntityHitResult_Class = "net/minecraft/class_3966";
+    inline constexpr const char* EntityHitResult_getEntity = "method_17782";
+    inline constexpr const char* EntityHitResult_getEntity_Sig = "()Lnet/minecraft/class_1297;";
+    
+    inline constexpr const char* MC_getConnection = "method_1562";
+    inline constexpr const char* MC_getConnection_Sig = "()Lnet/minecraft/class_634;";
+    inline constexpr const char* ClientCommonPacketListenerImpl_Class = "net/minecraft/class_634";
+    inline constexpr const char* CCPLI_connection = "field_45611"; // For 1.21 network handler
+    inline constexpr const char* CCPLI_connection_Sig = "Lnet/minecraft/class_2535;";
+    inline constexpr const char* Connection_send = "method_10752";
+    inline constexpr const char* Connection_send_Sig = "(Lnet/minecraft/class_2596;)V";
+    inline constexpr const char* ServerboundMovePlayerPacket_Pos_Class = "net/minecraft/class_2828$class_2829";
+    
+    inline constexpr const char* Player_swing = "method_6104";
+    inline constexpr const char* Player_swing_Sig = "(Lnet/minecraft/class_1268;)V";
+    inline constexpr const char* InteractionHand_Class = "net/minecraft/class_1268";
+    inline constexpr const char* InteractionHand_MAIN_HAND = "field_5808";
+    inline constexpr const char* InteractionHand_MAIN_HAND_Sig = "Lnet/minecraft/class_1268;";
+
+    inline constexpr const char* Block_Class = "net/minecraft/class_2248";
+    inline constexpr const char* Block_getDescriptionId = "method_9539";
+    inline constexpr const char* Block_getDescriptionId_Sig = "()Ljava/lang/String;";
+
+    inline constexpr const char* Vec3_D_Sig = "D";
+    inline constexpr const char* AABB_D_Sig = "D";
+
+    inline constexpr const char* LivingEntity_jumping = "field_6281";
+    inline constexpr const char* LivingEntity_jumping_Sig = "Z";
+    inline constexpr const char* LivingEntity_discardFriction = "field_6214";
+    inline constexpr const char* LivingEntity_discardFriction_Sig = "Z";
+    inline constexpr const char* Entity_isShiftKeyDown = "method_5715";
+    inline constexpr const char* Entity_isShiftKeyDown_Sig = "()Z";
+
+    inline constexpr const char* GR_getProjectionMatrix = "method_3195";
+    inline constexpr const char* GR_getProjectionMatrix_Sig = "(D)Lorg/joml/Matrix4f;";
+    inline constexpr const char* RS_getProjectionMatrix = "getProjectionMatrix";
+    inline constexpr const char* RS_getProjectionMatrix_Sig = "()Lorg/joml/Matrix4f;";
+    inline constexpr const char* RS_getModelViewMatrix = "getModelViewMatrix";
+    inline constexpr const char* RS_getModelViewMatrix_Sig = "()Lorg/joml/Matrix4f;";
+
+    inline constexpr const char* Matrix4f_m00 = "m00";
+    inline constexpr const char* Matrix4f_m01 = "m01";
+    inline constexpr const char* Matrix4f_m02 = "m02";
+    inline constexpr const char* Matrix4f_m03 = "m03";
+    inline constexpr const char* Matrix4f_m10 = "m10";
+    inline constexpr const char* Matrix4f_m11 = "m11";
+    inline constexpr const char* Matrix4f_m12 = "m12";
+    inline constexpr const char* Matrix4f_m13 = "m13";
+    inline constexpr const char* Matrix4f_m20 = "m20";
+    inline constexpr const char* Matrix4f_m21 = "m21";
+    inline constexpr const char* Matrix4f_m22 = "m22";
+    inline constexpr const char* Matrix4f_m23 = "m23";
+    inline constexpr const char* Matrix4f_m30 = "m30";
+    inline constexpr const char* Matrix4f_m31 = "m31";
+    inline constexpr const char* Matrix4f_m32 = "m32";
+    inline constexpr const char* Matrix4f_m33 = "m33";
+
+    inline constexpr const char* List_size = "size";
+    inline constexpr const char* List_size_Sig = "()I";
+    inline constexpr const char* List_get = "get";
+    inline constexpr const char* List_get_Sig = "(I)Ljava/lang/Object;";
+
 }

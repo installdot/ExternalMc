@@ -7,8 +7,8 @@ public:
     
     void onEnable() override;
     void onDisable() override;
-    void onUpdate() override;
-    void renderMenu() override;
+    void onUpdate(JNIEnv* env) override;
+    void onRender() override;
 
 private:
     int m_mode = 0; // 0 = Vanilla, 1 = Catch

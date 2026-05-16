@@ -365,7 +365,7 @@ void Menu::DrawMovementTab() {
             PhobiaCheckbox("Enable Flight", &en);
             fly->setEnabled(en);
             if (en) {
-                fly->renderMenu();
+                fly->onRender();
             }
         }
     }
@@ -379,7 +379,7 @@ void Menu::DrawMovementTab() {
             PhobiaCheckbox("Enable NoFall", &en);
             nofall->setEnabled(en);
             if (en) {
-                nofall->renderMenu();
+                nofall->onRender();
             }
         }
     }

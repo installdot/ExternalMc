@@ -111,6 +111,36 @@ LRESULT CALLBACK Hooks::hkWndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     // Toggle menu with INSERT
     if (msg == WM_KEYDOWN && wp == VK_INSERT) {
         Menu::toggle();
+        
+        // Handle Mouse state using JNI (Fabric 1.21 Intermediary)
+        JNIEnv* env = JvmWrapper::getEnv();
+        if (env) {
+            jclass mcClass = env->FindClass(Mappings::Minecraft_Class);
+            if (mcClass) {
+                jmethodID getInstance = env->GetStaticMethodID(mcClass, Mappings::MC_getInstance, Mappings::MC_getInstance_Sig);
+                jobject mc = env->CallStaticObjectMethod(mcClass, getInstance);
+                if (mc) {
+                    jfieldID mouseField = env->GetFieldID(mcClass, Mappings::MC_mouse, Mappings::MC_mouse_Sig);
+                    jobject mouse = env->GetObjectField(mc, mouseField);
+                    if (mouse) {
+                        jclass mouseClass = env->FindClass(Mappings::Mouse_Class);
+                        if (mouseClass) {
+                            if (Menu::isVisible()) {
+                                jmethodID unlock = env->GetMethodID(mouseClass, Mappings::Mouse_unlockCursor, Mappings::Mouse_unlockCursor_Sig);
+                                if (unlock) env->CallVoidMethod(mouse, unlock);
+                            } else {
+                                jmethodID lock = env->GetMethodID(mouseClass, Mappings::Mouse_lockCursor, Mappings::Mouse_lockCursor_Sig);
+                                if (lock) env->CallVoidMethod(mouse, lock);
+                            }
+                            env->DeleteLocalRef(mouseClass);
+                        }
+                        env->DeleteLocalRef(mouse);
+                    }
+                    env->DeleteLocalRef(mc);
+                }
+                env->DeleteLocalRef(mcClass);
+            }
+        }
         return TRUE;
     }
 

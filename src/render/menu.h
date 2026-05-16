@@ -78,10 +78,10 @@ private:
     static constexpr ImU32 COL_PARTICLE     = IM_COL32(174, 139, 148, 128);
 
     // ── Layout Constants ────────────────────────────────────────────
-    static constexpr float MENU_W           = 838.0f;
-    static constexpr float MENU_H           = 535.0f;
-    static constexpr float SIDEBAR_W        = 161.0f;
-    static constexpr float CONTENT_X        = 170.0f;
+    static constexpr float MENU_W           = 700.0f;
+    static constexpr float MENU_H           = 480.0f;
+    static constexpr float SIDEBAR_W        = 145.0f;
+    static constexpr float CONTENT_X        = 155.0f;
     static constexpr float TAB_H            = 30.0f;
     static constexpr float TAB_W            = 135.0f;
     static constexpr float CHILD_TITLE_H    = 25.0f;

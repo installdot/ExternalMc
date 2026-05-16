@@ -5,7 +5,8 @@
 #include "modules/esp.h"
 #include "modules/xray.h"
 #include "modules/aimassist.h"
-#include "modules/aimassist.h"
+#include "modules/fly.h"
+#include "modules/nofall.h"
 #include "sdk/minecraft.h"
 #include "sdk/entity.h"
 #include "sdk/world.h"
@@ -36,6 +37,8 @@ void ModuleManager::init() {
     reg(std::make_unique<ESP>());
     reg(std::make_unique<XRay>());
     reg(std::make_unique<AimAssist>());
+    reg(std::make_unique<FlyModule>());
+    reg(std::make_unique<NoFallModule>());
 
     printf("[Ghost] %zu modules registered successfully\n", s_modules.size());
 }

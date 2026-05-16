@@ -64,7 +64,8 @@ bool Menu::PhobiaCheckbox(const char* label, bool* v) {
 
     ImVec2 cursor = ImGui::GetCursorScreenPos();
     float boxSz = 18.0f;
-    ImVec2 totalSize(ImGui::GetContentRegionAvail().x, boxSz + 4);
+    ImVec2 totalSize(ImGui::GetContentRegionAvail().x, boxSz + 8);
+    
     ImGui::SetCursorScreenPos(cursor);
     bool pressed = ImGui::InvisibleButton(label, totalSize);
     if (pressed) *v = !(*v);
@@ -73,8 +74,8 @@ bool Menu::PhobiaCheckbox(const char* label, bool* v) {
     float hoverA = AnimateFloat(id + 3000, hovered ? 1.0f : 0.0f, 8.0f);
     float checkA = AnimateFloat(id + 4000, *v ? 1.0f : 0.0f, 10.0f);
 
-    ImVec2 boxMin(cursor.x, cursor.y + 2);
-    ImVec2 boxMax(cursor.x + boxSz, cursor.y + 2 + boxSz);
+    ImVec2 boxMin(cursor.x, cursor.y + 4);
+    ImVec2 boxMax(cursor.x + boxSz, cursor.y + 4 + boxSz);
 
     // Box border
     dl->AddRect(boxMin, boxMax, IM_COL32(41, 41, 41, (int)(255 * alpha)), 3.0f);
@@ -93,7 +94,7 @@ bool Menu::PhobiaCheckbox(const char* label, bool* v) {
 
     // Label text
     float textBright = 0.41f + 0.59f * ImMax(hoverA * 0.6f, *v ? 1.0f : 0.0f);
-    dl->AddText(ImVec2(cursor.x + boxSz + 8, cursor.y + 2),
+    dl->AddText(ImVec2(cursor.x + boxSz + 8, cursor.y + 4),
                 IM_COL32(255, 255, 255, (int)(255 * textBright * alpha)), label);
 
     return pressed;
@@ -108,7 +109,15 @@ bool Menu::PhobiaSliderFloat(const char* label, float* v, float v_min, float v_m
 
     float availW = ImGui::GetContentRegionAvail().x;
     ImVec2 cursor = ImGui::GetCursorScreenPos();
+    float totalH = 36.0f;
+    ImVec2 totalSize(availW, totalH);
 
+    ImGui::SetCursorScreenPos(cursor);
+    ImGui::InvisibleButton(label, totalSize);
+
+    bool hovered = ImGui::IsItemHovered();
+    bool active = ImGui::IsItemActive();
+    
     // Label above
     dl->AddText(ImVec2(cursor.x, cursor.y), IM_COL32(255, 255, 255, (int)(200 * alpha)), label);
 
@@ -120,16 +129,11 @@ bool Menu::PhobiaSliderFloat(const char* label, float* v, float v_min, float v_m
                 IM_COL32(255, 255, 255, (int)(200 * alpha)), valBuf);
 
     // Slider bar area
-    float barY = cursor.y + 20;
+    float barY = cursor.y + 22;
     float barH = 8.0f;
     ImVec2 barMin(cursor.x, barY);
     ImVec2 barMax(cursor.x + availW, barY + barH);
 
-    ImGui::SetCursorScreenPos(barMin);
-    ImGui::InvisibleButton(label, ImVec2(availW, barH + 10));
-
-    bool hovered = ImGui::IsItemHovered();
-    bool active = ImGui::IsItemActive();
     if (active) {
         float mouseX = ImGui::GetIO().MousePos.x;
         float t = ImClamp((mouseX - barMin.x) / availW, 0.0f, 1.0f);
@@ -150,7 +154,6 @@ bool Menu::PhobiaSliderFloat(const char* label, float* v, float v_min, float v_m
         dl->AddRectFilled(barMin, ImVec2(barMin.x + availW * frac, barMax.y), 
                           IM_COL32(174, 139, 148, (int)(255 * alpha)), 3.0f);
 
-    ImGui::SetCursorScreenPos(ImVec2(cursor.x, barY + barH + 6));
     return active;
 }
 
@@ -336,8 +339,10 @@ void Menu::DrawCombatTab() {
 // ── Tab Content: Movement ───────────────────────────────────────────
 void Menu::DrawMovementTab() {
     ImVec2 wPos = ImGui::GetWindowPos();
+    float col1 = wPos.x + CONTENT_X;
+    float col2 = wPos.x + CONTENT_X + 270.0f;
 
-    PhobiaChildBegin("Movement", ImVec2(wPos.x + CONTENT_X, wPos.y + 38), ImVec2(310, 200));
+    PhobiaChildBegin("Movement", ImVec2(col1, wPos.y + 38), ImVec2(260, 200));
     {
         auto* jesus = ModuleManager::getModule("Jesus");
         if (jesus) {
@@ -347,6 +352,34 @@ void Menu::DrawMovementTab() {
             if (en) {
                 PhobiaCheckbox("Solid Collision", &jesus->getBoolSetting("solid"));
                 PhobiaSliderFloat("Surface Bounce", &jesus->getFloatSetting("bounce"), 0.0f, 0.4f, "%.2f");
+            }
+        }
+    }
+    PhobiaChildEnd();
+
+    PhobiaChildBegin("Flight", ImVec2(col2, wPos.y + 38), ImVec2(260, 200));
+    {
+        auto* fly = ModuleManager::getModule("Fly");
+        if (fly) {
+            bool en = fly->isEnabled();
+            PhobiaCheckbox("Enable Flight", &en);
+            fly->setEnabled(en);
+            if (en) {
+                fly->renderMenu();
+            }
+        }
+    }
+    PhobiaChildEnd();
+
+    PhobiaChildBegin("Player", ImVec2(col1, wPos.y + 250), ImVec2(260, 150));
+    {
+        auto* nofall = ModuleManager::getModule("NoFall");
+        if (nofall) {
+            bool en = nofall->isEnabled();
+            PhobiaCheckbox("Enable NoFall", &en);
+            nofall->setEnabled(en);
+            if (en) {
+                nofall->renderMenu();
             }
         }
     }
